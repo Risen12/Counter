@@ -10,13 +10,16 @@ public class Timer : MonoBehaviour
 
     private float _delay = 0.5f;
     private bool _isButtonClicked;
+    private WaitUntil _waitConditionCoroutine;
+    private TextMeshProUGUI _buttonText;
 
     private void Start()
     {
         _isButtonClicked = false;
         _text.text = "0";
-
-        StartCoroutine(CountUp(_delay));
+        _waitConditionCoroutine = new WaitUntil(() => GetButtonState());
+        StartCoroutine(CountUp(_delay, _waitConditionCoroutine));
+        _buttonText = _button.GetComponentInChildren<TextMeshProUGUI>();
     }
 
     private void OnDisable()
@@ -31,14 +34,18 @@ public class Timer : MonoBehaviour
 
     private void HandleButtonState()
     {
-        _isButtonClicked = !_isButtonClicked;
-        ChangeButtonText();
+        if(_isButtonClicked == true)
+            _isButtonClicked = false;
+        else
+            _isButtonClicked = true;
+
+        ChangeButtonText(_isButtonClicked, _buttonText);
+        SwitchConditionCoroutine(_isButtonClicked);
     }
 
-    private IEnumerator CountUp(float delay)
+    private IEnumerator CountUp(float delay, WaitUntil waitCondition)
     {
         var wait = new WaitForSeconds(delay);
-        var waitCondition = new WaitUntil(() => GetState());
         int step = 0;
 
         while (true)
@@ -50,21 +57,27 @@ public class Timer : MonoBehaviour
         }
     }
 
-    private bool GetState() => _isButtonClicked;
+    private void SwitchConditionCoroutine(bool state)
+    {
+        if (state == true)
+            StartCoroutine(_waitConditionCoroutine);
+        else
+            StopCoroutine(_waitConditionCoroutine);
+    }
+
+    private bool GetButtonState() => _isButtonClicked;
 
     private void DisplayValue(int value)
     {
         _text.text = value.ToString();
     }
 
-    private void ChangeButtonText()
+    private void ChangeButtonText(bool state, TextMeshProUGUI buttonText)
     {
         string startCounter = "Запустить счётчик";
         string stopCounter = "Остановить счётчик";
 
-        TextMeshProUGUI buttonText = _button.GetComponentInChildren<TextMeshProUGUI>();
-
-        if (_isButtonClicked)
+        if (state == true)
             buttonText.text = stopCounter;
         else
             buttonText.text = startCounter;
