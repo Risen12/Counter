@@ -10,15 +10,15 @@ public class Timer : MonoBehaviour
 
     private float _delay = 0.5f;
     private bool _isButtonClicked;
-    private WaitUntil _waitConditionCoroutine;
+    private WaitUntil _waitUntilButtonActivates;
     private TextMeshProUGUI _buttonText;
 
     private void Start()
     {
         _isButtonClicked = false;
         _text.text = "0";
-        _waitConditionCoroutine = new WaitUntil(() => GetButtonState());
-        StartCoroutine(CountUp(_delay, _waitConditionCoroutine));
+        _waitUntilButtonActivates = new WaitUntil(() => GetButtonState());
+        StartCoroutine(CountUp(_delay, _waitUntilButtonActivates));
         _buttonText = _button.GetComponentInChildren<TextMeshProUGUI>();
     }
 
@@ -34,7 +34,7 @@ public class Timer : MonoBehaviour
 
     private void HandleButtonState()
     {
-        if(_isButtonClicked == true)
+        if(_isButtonClicked)
             _isButtonClicked = false;
         else
             _isButtonClicked = true;
@@ -60,9 +60,9 @@ public class Timer : MonoBehaviour
     private void SwitchConditionCoroutine(bool state)
     {
         if (state == true)
-            StartCoroutine(_waitConditionCoroutine);
+            StartCoroutine(_waitUntilButtonActivates);
         else
-            StopCoroutine(_waitConditionCoroutine);
+            StopCoroutine(_waitUntilButtonActivates);
     }
 
     private bool GetButtonState() => _isButtonClicked;
